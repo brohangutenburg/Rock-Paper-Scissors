@@ -1,15 +1,7 @@
-function getComputerInt(){
-    return Math.floor(Math.random()*3);
-}
 
-
-function getHumanChoice (){
-    let choice = prompt("Rock, Paper or Scissors? ");
-    return choice;
-}
-
-function convertComputerInt(computerInt){
+function getComputerChoice (){
     let computerChoice = "";
+    const computerInt = Math.floor(Math.random()*3);
     if (computerInt === 0){
          computerChoice = "rock";
     }
@@ -22,48 +14,91 @@ function convertComputerInt(computerInt){
     return computerChoice;
 }
 
-function playRound (human , computer) {
-    let winner = "";
-    if (human === "rock" && computer === "paper"){
-        winner = "computer";
-    } else if (human === "paper" && computer === "scissors") {
-        winner = "computer";
-    } else if (human === "scissors" && computer === "rock") {
-        winner = "computer";
-    } else if (computer === "rock" && human === "paper") {
-        winner = "human";
-    } else if (computer === "paper" && human === "scissors") {
-        winner = "human";
-    } else if (computer === "scissors" && human === "rock") {
-        winner = "human";
+function playRound (player , computer) {
+    let roundWinner = "";
+    const winMap = {
+        rock: "scissors",
+        paper: "rock",
+        scissors: "paper"
+    };
+    if (player === computer) {
+        roundWinner = "It's a tie";
+    } else if (winMap[player] === computer) {
+        roundWinner = "human";
+    } else {
+        roundWinner = "computer";
+    }
+    return roundWinner;
+}
+
+function displayResults (player , computer , winner) {
+    if (winner == "computer") {
+        const resultText = player + " loses to " + computer;
+        const result = document.getElementById("result");
+        result.textContent = resultText;
+
+    }
+    else if(winner == "human") {
+        const resultText = player + " beats " + computer;
+        const result = document.getElementById("result");
+        result.textContent = resultText;
     }
     else {
-        winner = "It's a Tie";
+        const resultText = player + " ties with " + computer;
+        const result = document.getElementById("result");
+        result.textContent = resultText;
     }
-    return winner;
 }
 
 
+let round = 1;
+let playerScore = 0;
+let computerScore = 0;
+const buttons = document.querySelectorAll(".rps-button");
+buttons.forEach(button => {
+    button.addEventListener("click", (event)=>{
+        const playerChoice = button.dataset.choice;
+        const computerChoice = getComputerChoice();
+        const roundWinner = playRound (playerChoice, computerChoice);
+        displayResults (playerChoice , computerChoice , roundWinner);
+        if (roundWinner == "human") {
+            playerScore++;
+        } else if (roundWinner == "computer") {
+            computerScore++;
+        }
+        const score = "Player: " + playerScore + " | Computer: " + computerScore;
+        const scoreboard =  document.getElementById("scoreboard");
+        scoreboard.textContent = score;
+        round++
+        const displayRound = document.getElementById("round")
+        displayRound.textContent = "Round: " + round;
+        if (round > 5) {
+            buttons.forEach(button => {
+                button.disabled = true;
+            })
+            if (playerScore > computerScore) {
+                const winner = document.getElementById("winner");
+                winner.textContent = "You won!"
+            } else if (playerScore < computerScore) {
+                const winner = document.getElementById("winner");
+                winner.textContent = "You lost!"
+            } else {
+                const winner = document.getElementById("winner");
+                winner.textContent = "It's a tie!"
+            }
+            const playAgain = document.createElement("button");
+            playAgain.textContent = "Play Again?";
+            playAgain.addEventListener("click", (event)=>{
+                let round = 1;
+                let playerScore = 0;
+                let computerScore = 0;
+                displayRound.textContent = "Round: " + round;
+                scoreboard.textContent = "Player: " + playerScore + " | Computer: " + computerScore;
+                winner.textContent = "";
+                playAgain.remove();
+            })
+            document.body.appendChild(playAgain);
+        }
 
-let playerTotal = 0;
-let computerTotal = 0;
-
-for (let round = 0; round < 5; round++){
-    console.log("Round " + (round+1));
-    let humanSelection = getHumanChoice().toLowerCase();
-    let computerInt = getComputerInt();
-    let computerSelection = convertComputerInt(computerInt);
-    let roundWinner = playRound(humanSelection, computerSelection);
-    console.log(humanSelection);
-    console.log(computerSelection);
-    console.log(roundWinner);
-
-    if (roundWinner === "computer") {
-      computerTotal++;
-    } else if (roundWinner === "human") {
-      playerTotal++;
-    }
-    console.log("Human: " + playerTotal);
-    console.log("Computer: " + computerTotal);
-
-}
+    })
+})
